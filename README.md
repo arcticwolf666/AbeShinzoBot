@@ -14,7 +14,13 @@ Discordのチャンネルに常駐し、投稿されたテキストを読み上�
     venv\Scripts\activate
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
     pip install style-bert-vits2
+    pip install PyNaCl
+    pip install discord.py
     ```
+
+    ffmpegを内部で使用するので、venv\Scripts 以下に bin 以下の実行ファイルを複製して下さい。
+    https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.7z
+
 2. Discord上アプリケーションを作成する
 
     https://discord.com/developers/applications からアプリケーションを作成する
