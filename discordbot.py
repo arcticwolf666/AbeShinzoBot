@@ -3,7 +3,7 @@ import re
 from scipy.io import wavfile
 
 # Discordから発行されたBOTのトークンを指定
-TOKEN="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+TOKEN="XXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 TEMPWAVFILE="output.wav"
 
 intents = discord.Intents.none()
@@ -65,7 +65,7 @@ async def on_message(message):
             return
         # connect to voice channel
         await message.author.voice.channel.connect()
-        await message.channel.send("接続しました")
+        await message.channel.send("接続しました。")
     elif message.content == "/leave":
         if message.guild.voice_client is None:
             await message.channel.send("接続していません。")
@@ -74,6 +74,9 @@ async def on_message(message):
         await message.guild.voice_client.disconnect()
         await message.channel.send("切断しました。")
     else:
+        if message.guild.voice_client is None:
+            await message.channel.send("切断されました、再度接続して下さい。")
+            return
         # play local wav file.
         print(f"推論します: {message.content}")
         text = escape_words(message.content)
