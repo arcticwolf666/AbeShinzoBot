@@ -4,7 +4,7 @@ Discordのチャンネルに常駐し、投稿されたテキストを読み上�
 
 ## 使用モデルについて
 
-晋バルサン氏の公開しているStyle-Vert-VITS2用のモデルをダウンロードし使用しています。<br>
+晋バルサン氏の公開しているStyle-Bert-VITS2用のモデルをダウンロードし使用しています。<br>
 https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
 
 ## 使用方法
