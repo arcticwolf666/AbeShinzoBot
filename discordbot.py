@@ -1,9 +1,9 @@
 import discord
-import os
+import re
 from scipy.io import wavfile
 
 # Discordから発行されたBOTのトークンを指定
-TOKEN="XXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+TOKEN="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 TEMPWAVFILE="output.wav"
 
 intents = discord.Intents.none()
@@ -44,6 +44,9 @@ model = TTSModel(
     device="cpu",
 )
 
+def escape_words(text: str) -> str:
+    return re.sub("https?://[\w!\?/\+\-_~=;\.,\*&@#\$%\(\)'\[\]]+", "リンク", text) 
+
 @client.event
 async def on_ready():
     print(f"Logged in as")
@@ -73,7 +76,8 @@ async def on_message(message):
     else:
         # play local wav file.
         print(f"推論します: {message.content}")
-        sr, audio = model.infer(text=message.content)
+        text = escape_words(message.content)
+        sr, audio = model.infer(text=text)
         wavfile.write(TEMPWAVFILE, sr, audio)
         message.guild.voice_client.play(discord.FFmpegPCMAudio(TEMPWAVFILE))
 
