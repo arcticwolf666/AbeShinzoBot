@@ -10,6 +10,8 @@ Discordのチャンネルに常駐し、投稿されたテキストを読み上�
 1. Pythonの仮想環境を作成し、その中にStyle-Bert-VITS2をインストールします
 
     ```
+    git clone https://github.com/arcticwolf666/AbeShinzoBot
+    cd AbeShinzoBot
     python -m venv venv
     venv\Scripts\activate
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
