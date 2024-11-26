@@ -54,9 +54,9 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
 
 5. 読み上げる
 
-    Discordのチャンネルで /join abeとコマンドを打つと、そのチャンネルに読み上げBOTが接続します。<br>
+    Discordのチャンネルで !abe とコマンドを打つと、そのチャンネルに読み上げBOTが接続します。<br>
     以後テキストが読み上げられる筈です。<br>
-    BOTの接続を解除するには /leave abeとコマンドを打って下さい。<br>
+    BOTの接続を解除するには !yamagami とコマンドを打って下さい。<br>
 
 6. 正規表現で特定のワードを書き換える
 

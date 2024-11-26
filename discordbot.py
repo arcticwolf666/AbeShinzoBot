@@ -14,6 +14,7 @@ from style_bert_vits2.constants import Languages
 from style_bert_vits2.tts_model import TTSModel
 from huggingface_hub import hf_hub_download
 import discord
+from discord.ext import commands
 
 # Discordクライアントの作成
 intents = discord.Intents.none()
@@ -21,7 +22,7 @@ intents.messages = True
 intents.message_content = True
 intents.guilds = True
 intents.voice_states = True
-client = discord.Client(intents=intents)
+bot = commands.Bot(intents=intents, command_prefix="!")
 
 # BERTモデルをダウンロード
 bert_models.load_model(Languages.JP, "ku-nlp/deberta-v2-large-japanese-char-wwm")
@@ -72,49 +73,75 @@ def replace_words(text: str) -> str:
         text = re.sub(regex, replace, text)
     return text
 
-@client.event
+def inference(text: str, voice_client: discord.VoiceProtocol) -> None:
+    """inference and play local wav file.
+    Args:
+        text:
+            音声合成するテキスト
+        voice_client:
+            Discordのボイスクライアント
+    """
+    text = replace_words(text)
+    sr, audio = model.infer(text=text)
+    filename="output.wav"
+    wavfile.write(filename, sr, audio)
+    voice_client.play(discord.FFmpegPCMAudio(filename))
+
+@bot.event
 async def on_ready() -> None:
     """Discordへ接続した時に呼ばれます
     """
     print(f"Logged in as")
-    print(f"client.user.name: {client.user.name}")
-    print(f"client.user.id: {client.user.id}")
+    print(f"client.user.name: {bot.user.name}")
+    print(f"client.user.id: {bot.user.id}")
     print(f"discord.version: {discord.__version__}")
     print(f'ready...')
 
-@client.event
-async def on_message(message) -> None:
-    """Discordのチャンネルでメッセージが送られた場合に呼ばれます
+@bot.command(name="abe", description="安倍晋三読み上げBOTを接続します")
+async def connect(ctx: discord.Interaction) -> None:
+    """!abe コマンドを受けた時に呼び出されます
+
     Args:
-        message:
-            https://discordpy.readthedocs.io/ja/latest/api.html#messages
+        ctx : discord.Interaction
     """
-    if message.author.bot:
+    print("connect")
+    if ctx.message.author.voice is None:
+        await ctx.message.channel.send("あなたはボイスチャンネルに接続していません。")
         return
-    if message.content == "/join abe":
-        if message.author.voice is None:
-            await message.channel.send("あなたはボイスチャンネルに接続していません。")
-            return
-        # connect to voice channel
-        await message.author.voice.channel.connect()
-        await message.channel.send("接続しました。")
-    elif message.content == "/leave abe":
-        if message.guild.voice_client is None:
-            await message.channel.send("接続していません。")
-            return
-        # disconnect
-        await message.guild.voice_client.disconnect()
-        await message.channel.send("切断しました。")
-    else:
-        if message.guild.voice_client is None:
-            await message.channel.send("切断されました、再度接続して下さい。")
-            return
-        # inference and play local wav file.
-        text = replace_words(message.content)
-        sr, audio = model.infer(text=text)
-        filename="output.wav"
-        wavfile.write(filename, sr, audio)
-        message.guild.voice_client.play(discord.FFmpegPCMAudio(filename))
+    await ctx.message.author.voice.channel.connect()
+    await ctx.message.channel.send("接続しました。")
+
+@bot.command(name="yamagami", description="安倍晋三読み上げBOTを切断します")
+async def disconnect(ctx: discord.Interaction) -> None:
+    """!yamagami コマンドを受けた場合に呼び出されます
+    Args:
+        ctx : discord.Interaction
+    """
+    print("disconnect")
+    if ctx.message.guild.voice_client is None:
+        await ctx.message.channel.send("接続していません。")
+        return
+    # disconnect
+    await ctx.message.guild.voice_client.disconnect()
+    await ctx.message.channel.send("切断しました。")
+
+@bot.event
+async def on_message(message: discord.Message) -> None:
+    """接続中チャンネルにメッセージが投稿される度に呼ばれます
+
+    Args:
+        message : discord.Message
+    """
+    # passing to bot command process.
+    await bot.process_commands(message)
+    # ignore bot message or connection not avilable.
+    if message.author.bot or message.guild.voice_client is None:
+        return
+    # does not inference command prefix.
+    if message.content.startswith("!"):
+        return
+    # inference and play local wav file.
+    inference(message.content, message.guild.voice_client)
 
 def main() -> None:
     """token.txtを読み込みDiscordとの通信を開始します
@@ -124,10 +151,9 @@ def main() -> None:
         print(f"{os.getcwd()} に token.txt を作成して下さい")
         exit(-1)
     with open("token.txt") as f:
-        token = f.read()
-        token = token.strip()
+        token = f.read().strip()
         print("Discordとの通信を開始します Ctrl+C で終了します")
-        client.run(token)
+        bot.run(token)
 
 if __name__ == '__main__':
     main()
