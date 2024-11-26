@@ -8,7 +8,7 @@ Discordのチャンネルに常駐し、投稿されたテキストを読み上�
 https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
 
 ## 使用方法
-1. Pythonの仮想環境を作成し、その中にStyle-Bert-VITS2をインストールします
+1. Pythonの仮想環境を作成し、その中に必須パッケージをインストールします。
 
     ```
     git clone https://github.com/arcticwolf666/AbeShinzoBot
@@ -16,21 +16,24 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
     python -m venv venv
     venv\Scripts\activate
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-    pip install style-bert-vits2
-    pip install PyNaCl
-    pip install discord.py
+    pip install -r requirements.txt
     ```
 
     ffmpegを内部で使用するので、venv\Scripts 以下に bin 以下の実行ファイルを複製して下さい。<br>
     https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.7z
 
+    CPUでも実用的な時間で音声合成できますが、CUDAを使用する事もできます。<br>
+    CUDAが使用できない環境下ではCPUにフォールバックします。<br>
+    CUDAを使用する場合CUDA Toolkit 11.8をインストールして下さい。<br>
+    https://developer.nvidia.com/cuda-11-8-0-download-archive
+
 2. Discord上アプリケーションを作成する
 
-    https://discord.com/developers/applications からアプリケーションを作成する
+    https://discord.com/developers/applications からアプリケーションを作成する。
     ![1-application.png](images/1-applications.png)
     ![2-create.png](images/2-create.png)
     ![3-generalinfo.png](images/3-generalinfo.png)
-    BOTを作成します
+    BOTを作成します、ResetTokenで新たなトークンが生成されるので token.txt にそれを記述します。
     ![4-createbot.png](images/4-createbot.png)
     BOTをサーバに追加する為のURLを取得します(GENERATED URL)
     ![5-oauth.png](images/5-oauth.png)
@@ -39,19 +42,23 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
     ![7-addbot.png](images/7-addbot.png)
     ![8-auth.png](images/8-auth.png)
 
-3. discordbot.py の TOKEN をDiscordで発行されたBOTトークンに書き換えて下さい。
+3. token.txtを作成しDiscordで発行されたBOTのトークンを張り付け保存します。
 
-    ```python
-    TOKEN="DiscordのBOTで生成したトークンに書き換える"
-    ```
 4. Pythonの仮想環境上でBOTを動かす
 
     ```
     venv\Scripts\activate
     python discordbot.py
     ```
+    Ctrl+Cで終了します。
+
 5. 読み上げる
 
-    Discordのチャンネルで /join とコマンドを打つと、そのチャンネルに読み上げBOTが接続します。<br>
+    Discordのチャンネルで /join abeとコマンドを打つと、そのチャンネルに読み上げBOTが接続します。<br>
     以後テキストが読み上げられる筈です。<br>
-    BOTの接続を解除するには /leave とコマンドを打って下さい。<br>
+    BOTの接続を解除するには /leave abeとコマンドを打って下さい。<br>
+
+6. 正規表現で特定のワードを書き換える
+
+    replace.csv に "正規表現","置換後文字列" を記述する事で特定の単語を置き換える事ができます。
+    BOTがうまく読まない単語を、ひらがなで記述する事で一応読み上げる様になります。
