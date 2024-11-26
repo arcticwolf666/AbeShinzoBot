@@ -8,7 +8,6 @@ import sys
 import re
 import csv
 from pathlib import Path
-from scipy.io import wavfile
 import librosa
 import numpy as np
 import torch
