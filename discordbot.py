@@ -108,8 +108,11 @@ async def connect(ctx: discord.Interaction) -> None:
     if ctx.message.author.voice is None:
         await ctx.message.channel.send("あなたはボイスチャンネルに接続していません。")
         return
+    if ctx.message.guild.voice_client:
+        await ctx.message.channel.send("他のチャンネルで使用されています、切断してからお試し下さい。")
+        return
     await ctx.message.author.voice.channel.connect()
-    await ctx.message.channel.send("接続しました。")
+    await ctx.message.channel.send("接続しました、!yamagami で切断します。")
 
 @bot.command(name="yamagami", description="安倍晋三読み上げBOTを切断します")
 async def disconnect(ctx: discord.Interaction) -> None:
