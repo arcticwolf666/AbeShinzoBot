@@ -19,9 +19,6 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
     pip install -r requirements.txt
     ```
 
-    ffmpegを内部で使用するので、venv\Scripts 以下に bin 以下の実行ファイルを複製して下さい。<br>
-    https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.7z
-
     CPUでも実用的な時間で音声合成できますが、CUDAを使用する事もできます。<br>
     CUDAが使用できない環境下ではCPUにフォールバックします。<br>
     CUDAを使用する場合CUDA Toolkit 11.8をインストールして下さい。<br>
