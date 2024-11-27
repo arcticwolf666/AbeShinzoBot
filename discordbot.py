@@ -7,7 +7,7 @@ import os
 import sys
 import re
 import csv
-import asyncio
+import time
 from pathlib import Path
 import librosa
 import numpy as np
@@ -239,14 +239,17 @@ async def on_message(message: discord.Message) -> None:
         return
     # wait for audio streaming. if it does not stop after waiting 10seconds, force stop it.
     retry = 0
+    retry_max = 10
     while message.guild.voice_client.is_playing():
-        await asyncio.sleep(1)
+        #await asyncio.sleep(1)
+        time.sleep(1)
         retry = retry + 1
-        if retry == 10:
-            print("WARNING: audio streaming timeout, force skip it.")
+        if retry == retry_max:
+            print("再生が終らないので省略します")
             message.guild.voice_client.stop()
     # inference and play local wav file.
-    inference(message.content, message.guild.voice_client)
+    text = ("省略しました。" if retry >= retry_max else "") + message.content
+    inference(text, message.guild.voice_client)
 
 def main() -> None:
     """token.txtを読み込みDiscordとの通信を開始します
