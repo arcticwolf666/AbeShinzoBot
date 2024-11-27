@@ -2,6 +2,8 @@
 
 token.txt にDiscordで発行されたトークンを記述して下さい。
 replace.csv に "正規表現","置換ワード" の文字列置換ルールを記述して下さい。
+ボイスチャンネルに入室し !abe で読み上げを開始します。
+!yamagami でボイスチャンネルからBOTが切断します(任意のチャンネルから行えます)
 """
 import os
 import sys
@@ -47,7 +49,7 @@ model = TTSModel(
     model_path = assets_root / model_file,
     config_path = assets_root / config_file,
     style_vec_path = assets_root / style_file,
-    device="cuda" if torch.cuda.is_available else "cpu",
+    device = "cuda" if torch.cuda.is_available else "cpu",
 )
 
 # 正規表現での文字列置換ルールを読み込む
@@ -98,7 +100,6 @@ class ConvertMonoToDiscordPCM(discord.AudioSource):
                 original sampling rate
             tgt_sr : int
                 target sampling rate
-
         """
         super().__init__()
         self.pos = 0
@@ -137,8 +138,8 @@ class ConvertMonoToDiscordPCM(discord.AudioSource):
         """tgt_sr * 20ms分のRAWステレオPCMを返し次のオフセットを記憶します
 
         Returns
-        bytearray
-            切り出したRAWステレオPCMデータ
+            bytearray
+                切り出したRAWステレオPCMデータ
         """
         rem = len(self.pcm) - self.pos
         pad = 0
@@ -170,6 +171,7 @@ class ConvertMonoToDiscordPCM(discord.AudioSource):
 
 def inference(text: str, voice_client: discord.VoiceProtocol) -> None:
     """inference and play local wav file.
+
     Args:
         text:
             音声合成するテキスト
@@ -211,6 +213,7 @@ async def connect(ctx: discord.Interaction) -> None:
 @bot.command(name="yamagami", description="安倍晋三読み上げBOTを切断します")
 async def disconnect(ctx: discord.Interaction) -> None:
     """!yamagami コマンドを受けた場合に呼び出されます
+
     Args:
         ctx : discord.Interaction
     """
@@ -241,13 +244,12 @@ async def on_message(message: discord.Message) -> None:
     retry = 0
     retry_max = 10
     while message.guild.voice_client.is_playing():
-        #await asyncio.sleep(1)
         time.sleep(1)
         retry = retry + 1
         if retry == retry_max:
             print("再生が終らないので省略します")
             message.guild.voice_client.stop()
-    # inference and play local wav file.
+    # inference and play PCM stream.
     text = ("省略しました。" if retry >= retry_max else "") + message.content
     inference(text, message.guild.voice_client)
 
