@@ -7,6 +7,7 @@ import os
 import sys
 import re
 import csv
+import asyncio
 from pathlib import Path
 import librosa
 import numpy as np
@@ -236,6 +237,14 @@ async def on_message(message: discord.Message) -> None:
     # does not inference command prefix.
     if message.content.startswith("!"):
         return
+    # wait for audio streaming. if it does not stop after waiting 10seconds, force stop it.
+    retry = 0
+    while message.guild.voice_client.is_playing():
+        await asyncio.sleep(1)
+        retry = retry + 1
+        if retry == 10:
+            print("WARNING: audio streaming timeout, force skip it.")
+            message.guild.voice_client.stop()
     # inference and play local wav file.
     inference(message.content, message.guild.voice_client)
 
