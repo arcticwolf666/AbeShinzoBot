@@ -65,7 +65,7 @@ model = TTSModel(
     model_path = assets_root / model_file,
     config_path = assets_root / config_file,
     style_vec_path = assets_root / style_file,
-    device = "cuda" if torch.cuda.is_available else "cpu",
+    device = "cuda" if torch.cuda.is_available() else "cpu",
 )
 
 # 正規表現での文字列置換ルールを読み込む
@@ -258,6 +258,7 @@ async def on_message(message: discord.Message) -> None:
     if message.content.startswith("!"):
         return
     # wait for audio streaming. if it does not stop after waiting 10seconds, force stop it.
+    # TODO: 低速な環境だとasyncioがタイムアウトしてしまう、別な方法で再生をキャンセルする。
     retry = 0
     retry_max = 10
     while message.guild.voice_client.is_playing():

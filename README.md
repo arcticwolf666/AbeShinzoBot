@@ -20,12 +20,13 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
     pip install -r requirements.txt
     ```
 
-    Linux(Ubuntu-22.04)
+    Linux(Ubuntu-22.04) CUDA
     ```bash
     git clone https://github.com/arcticwolf666/AbeShinzoBot
     cd AbeShinzoBot
     python -m venv venv
     source venv/bin/activate
+    pip install --upgrade pip
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
     pip install -r requirements.txt
     sudo apt-get install libopus0
@@ -35,6 +36,20 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
     CUDAが使用できない環境下ではCPUにフォールバックします。<br>
     CUDAを使用する場合CUDA Toolkit 11.8をインストールして下さい。<br>
     https://developer.nvidia.com/cuda-11-8-0-download-archive
+
+    Linux(Ubuntu-22.04) CPU
+    ```bash
+    git clone https://github.com/arcticwolf666/AbeShinzoBot
+    cd AbeShinzoBot
+    python -m venv venv
+    source venv/bin/activate
+    pip install --upgrade pip
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+    pip install -r requirements.txt
+    sudo apt-get install libopus0
+    ```
+
+    CUDA向けのpytorchで上手く動作しない場合 cpu 版のtorchをインストールして下さい。<br>
 
 2. Discord上アプリケーションを作成する
 
