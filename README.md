@@ -8,10 +8,10 @@ Discordのチャンネルに常駐し、投稿されたテキストを読み上�
 https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
 
 ## 使用方法
-1. Pythonの仮想環境を作成し、その中に必須パッケージをインストールします。
+1. Pythonの仮想環境を作成し、その中に必須パッケージをインストールします。動作確認したPythonのバージョンは3.10系です、異るバージョンがインストールされている場合、下部の補足を参考にPythonをソースからビルドして下さい。
 
     Windows
-    ```
+    ```bat
     git clone https://github.com/arcticwolf666/AbeShinzoBot
     cd AbeShinzoBot
     python -m venv venv
@@ -21,7 +21,7 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
     ```
 
     Linux(Ubuntu-22.04)
-    ```
+    ```bash
     git clone https://github.com/arcticwolf666/AbeShinzoBot
     cd AbeShinzoBot
     python -m venv venv
@@ -55,10 +55,18 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
 
 4. Pythonの仮想環境上でBOTを動かす
 
+    Windows
     ```
     venv\Scripts\activate
     python discordbot.py
     ```
+
+    Linux(Ubuntu-22.04)
+    ```
+    source venv/Scripts/activate
+    python discordbot.py
+    ```
+
     Ctrl+Cで終了します。
 
 5. 読み上げる
@@ -71,3 +79,61 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
 
     replace.csv に "正規表現","置換後文字列" を記述する事で特定の単語を置き換える事ができます。
     BOTがうまく読まない単語を、ひらがなで記述する事で一応読み上げる様になります。
+
+## 補足
+* Linux(Ubuntu-22.04) 上で Python-3.10.15 をビルドする
+
+    依存パッケージをインストールする
+    ```bash
+    sudo apt install -y build-essential libbz2-dev libdb-dev \
+        libreadline-dev libffi-dev libgdbm-dev liblzma-dev \
+        libncursesw5-dev libsqlite3-dev libssl-dev \
+        zlib1g-dev uuid-dev tk-dev
+    ```
+
+    Pythonをビルドする(--prefixと make -j 32 は使用環境に合せて下さい)
+    ```bash
+    mkdir ~/sources
+    cd ~/sources
+    wget https://www.python.org/ftp/python/3.10.15/Python-3.10.15.tar.xz
+    tar xJfv ~/sources/Python-3.10.15.tar.xz
+    cd Python-3.10.15
+    ./configure --prefix=/home/owner/python3
+    make -j 32
+    make install
+    ```
+
+    インストールしたPythonのビルドを有効にするするスクリプトを作成する(/home/owner は使用環境に合せて下さい)
+    ```bash ~/python3/enable
+    #!/bin/bash
+    PATH="/home/owner/python3/bin:$PATH"
+    export PATH
+    LD_LIBRARY_PATH="/home/owner/python3/lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH
+    hash -r
+    ```
+
+    eanbleを取り込みパスを通す
+    ```bash
+    source ~/python3/enable
+    which python
+    ```
+
+    /home/owner/python3/bin/python が出力されていればパスが通っています。
+
+* Linux 上で systemd のサービスとして登録する
+
+    abeshinzo.service の ExecStart WorkingDirecotry User を環境に合せて書き換えて下さい。
+
+    | 名称      | 説明 |
+    |-----------|------|
+    | ExecStart | AbeShinzoBotに付属の run.sh の絶対パスを指定します。|
+    | WorkingDirecotry | AbeShinzoBotの絶対パスを指定します。|
+    | User | BOTを動かすUNIXユーザー名を指定します。|
+
+    次のコマンドラインで systemd に登録しBOTを起動します。
+    ```bash
+    sudo install -g root -o root abeshinzo.service /etc/systemd/system/abeshinzo.service 
+    sudo systemctl enable abeshinzobot
+    sudo systemctl start abeshinzobot
+    ```
