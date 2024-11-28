@@ -13,7 +13,6 @@ import time
 from logging import (
     getLogger,
     DEBUG,
-    BASIC_FORMAT,
     Formatter,
     StreamHandler
 )

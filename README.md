@@ -10,6 +10,7 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
 ## 使用方法
 1. Pythonの仮想環境を作成し、その中に必須パッケージをインストールします。
 
+    Windows
     ```
     git clone https://github.com/arcticwolf666/AbeShinzoBot
     cd AbeShinzoBot
@@ -17,6 +18,17 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
     venv\Scripts\activate
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
     pip install -r requirements.txt
+    ```
+
+    Linux(Ubuntu-22.04)
+    ```
+    git clone https://github.com/arcticwolf666/AbeShinzoBot
+    cd AbeShinzoBot
+    python -m venv venv
+    source venv/bin/activate
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+    pip install -r requirements.txt
+    sudo apt-get install libopus0
     ```
 
     CPUでも実用的な時間で音声合成できますが、CUDAを使用する事もできます。<br>
