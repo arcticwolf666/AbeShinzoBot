@@ -107,8 +107,8 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
     popd
     ```
 
-    インストールしたPythonのビルドを有効にするするスクリプトを作成する(/home/owner は使用環境に合せて下さい)
-    ```bash ~/python3/enable
+    インストールしたPythonのビルドを有効にするするスクリプトを ~/python3/enable に作成する(/home/owner は使用環境に合せて下さい)
+    ```bash
     #!/bin/bash
     PATH="/home/owner/python3/bin:$PATH"
     export PATH
