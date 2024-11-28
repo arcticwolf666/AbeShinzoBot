@@ -101,6 +101,10 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
     ./configure --prefix=/home/owner/python3
     make -j 32
     make install
+    pushd ~/python3/bin
+    ln -fs python3 python
+    ln -fs pip3 pip
+    popd
     ```
 
     インストールしたPythonのビルドを有効にするするスクリプトを作成する(/home/owner は使用環境に合せて下さい)
