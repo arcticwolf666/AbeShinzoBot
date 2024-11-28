@@ -10,6 +10,13 @@ import sys
 import re
 import csv
 import time
+from logging import (
+    getLogger,
+    DEBUG,
+    BASIC_FORMAT,
+    Formatter,
+    StreamHandler
+)
 from pathlib import Path
 import librosa
 import numpy as np
@@ -20,6 +27,16 @@ from style_bert_vits2.tts_model import TTSModel
 from huggingface_hub import hf_hub_download
 import discord
 from discord.ext import commands
+
+# loggerの作成
+logger = getLogger("discordbot.py")
+logger.setLevel(DEBUG)
+log_handler = StreamHandler()
+dt_fmt = '%Y-%m-%d %H:%M:%S'
+log_formatter = Formatter('{asctime} {levelname:<8} {name} {message}', dt_fmt, style='{')
+log_handler.setFormatter(log_formatter)
+logger.addHandler(log_handler)
+logger.info("logging begin.")
 
 # Discordクライアントの作成
 intents = discord.Intents.none()
@@ -39,7 +56,7 @@ config_file = "config.json"
 style_file = "style_vectors.npy"
 
 for file in [model_file, config_file, style_file]:
-    print(file)
+    logger.info(f"loading {file}")
     hf_hub_download("AbeShinzo0708/AbeShinzo_Style_Bert_VITS2", file, local_dir="model_assets")
 
 # Text to Speach モデルの構築
@@ -54,6 +71,7 @@ model = TTSModel(
 
 # 正規表現での文字列置換ルールを読み込む
 replace_rule = []
+logger.info(f"loading replace.csv")
 with open("replace.csv", "r", encoding="utf-8") as csv_file:
     rules = csv.reader(
         csv_file,
@@ -187,11 +205,11 @@ def inference(text: str, voice_client: discord.VoiceProtocol) -> None:
 async def on_ready() -> None:
     """Discordへ接続した時に呼ばれます
     """
-    print(f"Logged in as")
-    print(f"client.user.name: {bot.user.name}")
-    print(f"client.user.id: {bot.user.id}")
-    print(f"discord.version: {discord.__version__}")
-    print(f'ready...')
+    logger.info(f"Logged in as")
+    logger.info(f"client.user.name: {bot.user.name}")
+    logger.info(f"client.user.id: {bot.user.id}")
+    logger.info(f"discord.version: {discord.__version__}")
+    logger.info(f'ready...')
 
 @bot.command(name="abe", description="安倍晋三読み上げBOTを接続します")
 async def connect(ctx: discord.Interaction) -> None:
@@ -200,7 +218,7 @@ async def connect(ctx: discord.Interaction) -> None:
     Args:
         ctx : discord.Interaction
     """
-    print("connect")
+    logger.info("connect")
     if ctx.message.author.voice is None:
         await ctx.message.channel.send("あなたはボイスチャンネルに接続していません。")
         return
@@ -217,7 +235,7 @@ async def disconnect(ctx: discord.Interaction) -> None:
     Args:
         ctx : discord.Interaction
     """
-    print("disconnect")
+    logger.info("disconnect")
     if ctx.message.guild.voice_client is None:
         await ctx.message.channel.send("接続していません。")
         return
@@ -247,7 +265,7 @@ async def on_message(message: discord.Message) -> None:
         time.sleep(1)
         retry = retry + 1
         if retry == retry_max:
-            print("再生が終らないので省略します")
+            logger.info("再生が終らないので省略します")
             message.guild.voice_client.stop()
     # inference and play PCM stream.
     text = ("省略しました。" if retry >= retry_max else "") + message.content
@@ -257,12 +275,12 @@ def main() -> None:
     """token.txtを読み込みDiscordとの通信を開始します
     """
     if not os.path.isfile("token.txt"):
-        print(f"token.txt が存在しません")
-        print(f"{os.getcwd()} に token.txt を作成して下さい")
+        logger.error(f"token.txt not found.")
+        logger.error(f"{os.getcwd()} に token.txt を作成して下さい")
         exit(-1)
     with open("token.txt") as f:
         token = f.read().strip()
-        print("Discordとの通信を開始します Ctrl+C で終了します")
+        logger.info("Discordとの通信を開始します")
         bot.run(token)
 
 if __name__ == '__main__':
