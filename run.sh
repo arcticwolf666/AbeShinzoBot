@@ -28,6 +28,7 @@ exec 3>> "${log_file}"
 exec 1>&3
 exec 2>&3
 source "${dist_path}/venv/bin/activate"
+cd "${dist_path}"
 result=$(python "${script_file}")
 exec 3>&-
 

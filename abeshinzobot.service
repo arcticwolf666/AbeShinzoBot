@@ -1,0 +1,13 @@
+[Unit]
+Description = AbeShinzoBot
+
+[Service]
+ExecStart = /home/owner/AbeShinzoBot/run.sh
+WorkingDirectory = /home/owner/AbeShinzoBot/
+Restart = always
+Type = simple
+User = owner
+Restart = on-failure
+
+[Install]
+WantedBy = multi-user.target
