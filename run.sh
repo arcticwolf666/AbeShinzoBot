@@ -29,7 +29,8 @@ exec 1>&3
 exec 2>&3
 source "${dist_path}/venv/bin/activate"
 cd "${dist_path}"
-result=$(python "${script_file}")
+python "${script_file}"
+result=$?
 exec 3>&-
 
 exit $result
