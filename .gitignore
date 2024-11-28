@@ -1,3 +1,4 @@
 venv/
 model_assets/
+log/
 token.txt
