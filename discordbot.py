@@ -9,7 +9,7 @@ import os
 import sys
 import re
 import csv
-import time
+import asyncio
 from logging import (
     getLogger,
     DEBUG,
@@ -95,41 +95,39 @@ def replace_words(text: str) -> str:
         text = re.sub(regex, replace, text)
     return text
 
-class ConvertMonoToDiscordPCM(discord.AudioSource):
-    """numpy.ndarrayのモノラルPCMを16bitステレオPCMに変換するストリーム
+class InferenceStream(discord.AudioSource):
+    """推論を行いストリーミングを行う
     """
-    pcm:bytearray = bytearray()
-    pos:int = 0
-    sr:int = 0
+    text: str = ""
+    streaming : bool = False
+    sr: int = 48000
+    pcm: bytearray = bytearray()
+    pos: int = 0
 
-    def __init__(self,
-                 mono: np.ndarray,
-                 org_sr: int,
-                 tgt_sr: int
-                 ):
+    def __init__(self, text: str):
         """constructor
 
         Args:
             self : ConvertNumberToDiscordPCM
-            mono : np.ndarray
-                mono pcm audio
-            org_sr : int
-                original sampling rate
-            tgt_sr : int
-                target sampling rate
+            text : inference text.
         """
         super().__init__()
+        self.text = text
+
+    def inference(self) -> None:
+        # inference.
+        self.text = replace_words(self.text)
+        sr, audio = model.infer(text=self.text)
         self.pos = 0
-        self.sr = tgt_sr
-        fpmono = np.zeros(len(mono))
+        fpmono = np.zeros(len(audio))
         # convert 16bit integer to floating point for librosa.
-        for i in range(len(mono)):
-            fpmono[i] = (float(mono[i]) / 32767.0)
+        for i in range(len(audio)):
+            fpmono[i] = (float(audio[i]) / 32767.0)
         # resampling
         resampled = librosa.resample(
             y = fpmono,
-            orig_sr = org_sr,
-            target_sr = tgt_sr,
+            orig_sr = sr,
+            target_sr = self.sr,
             res_type = "soxr_hq" 
         )
         # normalize signal.
@@ -158,6 +156,12 @@ class ConvertMonoToDiscordPCM(discord.AudioSource):
             bytearray
                 切り出したRAWステレオPCMデータ
         """
+        # inference
+        if not self.streaming:
+            self.inference()
+            self.streaming = True
+
+        # streaming.
         rem = len(self.pcm) - self.pos
         pad = 0
         if rem == 0:
@@ -183,22 +187,12 @@ class ConvertMonoToDiscordPCM(discord.AudioSource):
     def cleanup(self) -> None:
         """クリーンアップが必要な時に呼ばれます
         """
+        self.text = ""
+        self.streaming = False
         self.pcm = bytearray(0)
         self.pos = 0
+        self.sr = 0
 
-def inference(text: str, voice_client: discord.VoiceProtocol) -> None:
-    """inference and play local wav file.
-
-    Args:
-        text:
-            音声合成するテキスト
-        voice_client:
-            Discordのボイスクライアント
-    """
-    text = replace_words(text)
-    sr, audio = model.infer(text=text)
-    source = ConvertMonoToDiscordPCM(audio, sr, 48000)
-    voice_client.play(source)
 
 @bot.event
 async def on_ready() -> None:
@@ -257,19 +251,14 @@ async def on_message(message: discord.Message) -> None:
     # does not inference command prefix.
     if message.content.startswith("!"):
         return
-    # wait for audio streaming. if it does not stop after waiting 10seconds, force stop it.
-    # TODO: 低速な環境だとasyncioがタイムアウトしてしまう、別な方法で再生をキャンセルする。
-    retry = 0
-    retry_max = 10
-    while message.guild.voice_client.is_playing():
-        time.sleep(1)
-        retry = retry + 1
-        if retry == retry_max:
-            logger.info("再生が終らないので省略します")
-            message.guild.voice_client.stop()
+    # skip previous playing stream.
+    text = message.content
+    if message.guild.voice_client.is_playing():
+        logger.info("長い読み上げを省略します")
+        message.guild.voice_client.stop()
+        text = "省略しました。" + text
     # inference and play PCM stream.
-    text = ("省略しました。" if retry >= retry_max else "") + message.content
-    inference(text, message.guild.voice_client)
+    message.guild.voice_client.play(InferenceStream(text))
 
 def main() -> None:
     """token.txtを読み込みDiscordとの通信を開始します
