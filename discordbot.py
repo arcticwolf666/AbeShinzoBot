@@ -204,6 +204,9 @@ async def on_ready() -> None:
     logger.info(f"discord.version: {discord.__version__}")
     logger.info(f'ready...')
 
+# 接続中チャンネルID一覧
+connected_channels = []
+
 @bot.command(name="abe", description="安倍晋三読み上げBOTを接続します")
 async def connect(ctx: discord.Interaction) -> None:
     """!abe コマンドを受けた時に呼び出されます
@@ -218,6 +221,8 @@ async def connect(ctx: discord.Interaction) -> None:
     if ctx.message.guild.voice_client:
         await ctx.message.channel.send("他のチャンネルで使用されています、切断してからお試し下さい。")
         return
+    logger.info(f"connecting to channel {ctx.message.author.voice.channel.id}")
+    connected_channels.append(ctx.message.author.voice.channel.id)
     await ctx.message.author.voice.channel.connect()
     await ctx.message.channel.send("接続しました、!yamagami で切断します。")
 
@@ -233,6 +238,8 @@ async def disconnect(ctx: discord.Interaction) -> None:
         await ctx.message.channel.send("接続していません。")
         return
     # disconnect
+    logger.info(f"disconnecting from channel {ctx.message.channel.id}")
+    connected_channels.remove(ctx.message.channel.id)
     await ctx.message.guild.voice_client.disconnect()
     await ctx.message.channel.send("切断しました。")
 
@@ -248,17 +255,22 @@ async def on_message(message: discord.Message) -> None:
     # ignore bot message or connection not avilable.
     if message.author.bot or message.guild.voice_client is None:
         return
-    # does not inference command prefix.
+    # ignore not voice channel message.
+    if message.author.voice is None:
+        return
+    # ignore not matching voice client and guild id.
     if message.content.startswith("!"):
         return
-    # skip previous playing stream.
-    text = message.content
-    if message.guild.voice_client.is_playing():
-        logger.info("長い読み上げを省略します")
-        message.guild.voice_client.stop()
-        text = "省略しました。" + text
-    # inference and play PCM stream.
-    message.guild.voice_client.play(InferenceStream(text))
+    if message.channel.id in connected_channels:
+        logger.info(f"inference on channel {message.channel.id}")
+        # skip previous playing stream.
+        text = message.content
+        if message.guild.voice_client.is_playing():
+            logger.info("長い読み上げを省略します")
+            message.guild.voice_client.stop()
+            text = "省略しました。" + text
+        # inference and play PCM stream.
+        message.guild.voice_client.play(InferenceStream(text))
 
 def main() -> None:
     """token.txtを読み込みDiscordとの通信を開始します
