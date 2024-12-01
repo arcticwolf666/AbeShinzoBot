@@ -142,7 +142,7 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
 
 * Linux 上で systemd のサービスとして登録する
 
-    abeshinzo.service の ExecStart WorkingDirecotry User を環境に合せて書き換えて下さい。
+    abeshinzobot.service の ExecStart WorkingDirecotry User を環境に合せて書き換えて下さい。
 
     | 名称      | 説明 |
     |-----------|------|
@@ -152,7 +152,17 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
 
     次のコマンドラインで systemd に登録しBOTを起動します。
     ```bash
-    sudo install -g root -o root abeshinzo.service /etc/systemd/system/abeshinzo.service 
+    sudo install -g root -o root -m 644 abeshinzobot.service /etc/systemd/system/abeshinzo.service 
     sudo systemctl enable abeshinzobot
     sudo systemctl start abeshinzobot
+    ```
+
+* Linux 上で logrotate を行う
+
+    abeshinzobot.logrotate のログファイルパスを書き換えて下さい。
+
+    次のコマンドラインで logorate.d に設定します
+    ```bash
+    sudo install -g root -o root -m 644 abeshinzobot.logrotate /etc/logrotate.d/abeshinzobot
+    sudo systemctl restart logrotate
     ```

@@ -7,4 +7,7 @@
         compress
         delaycompress
         sharedscripts
+	postrotate
+		systemctl restart abeshinzobot
+	endscript
 }
