@@ -1,0 +1,10 @@
+/home/owner/AbeShinzoBot/log/discordbot.log
+{
+        rotate 15
+        weekly
+        missingok
+        notifempty
+        compress
+        delaycompress
+        sharedscripts
+}
