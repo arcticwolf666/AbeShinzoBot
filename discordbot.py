@@ -207,6 +207,11 @@ async def on_ready() -> None:
 # 接続中チャンネルID一覧
 connected_channels = []
 
+@bot.event
+async def on_disconnect():
+    logger.info("disconnect from peer.")
+    connected_channels.clear()
+
 @bot.command(name="abe", description="安倍晋三読み上げBOTを接続します")
 async def connect(ctx: discord.Interaction) -> None:
     """!abe コマンドを受けた時に呼び出されます
