@@ -65,7 +65,8 @@ model = TTSModel(
     model_path = assets_root / model_file,
     config_path = assets_root / config_file,
     style_vec_path = assets_root / style_file,
-    device = "cuda" if torch.cuda.is_available() else "cpu",
+    #device = "cuda" if torch.cuda.is_available() else "cpu",
+    device = "cpu",
 )
 
 # 正規表現での文字列置換ルールを読み込む
