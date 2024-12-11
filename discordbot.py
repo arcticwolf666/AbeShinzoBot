@@ -1,4 +1,4 @@
-"""安倍晋三読み上げBOT
+"""AI晋さん読み上げBOT
 
 token.txt にDiscordで発行されたトークンを記述して下さい。
 replace.csv に "正規表現","置換ワード" の文字列置換ルールを記述して下さい。
@@ -270,9 +270,13 @@ async def on_message(message: discord.Message) -> None:
         return
     if message.channel.id in connected_channels:
         logger.info(f"inference on channel {message.channel.id}")
+<<<<<<< HEAD
         # ignore empty lines.
         text = message.content
         text.strip()
+=======
+        text = message.content.split()
+>>>>>>> refs/remotes/origin/main
         if len(text) == 0:
             return
         # skip previous playing stream.
