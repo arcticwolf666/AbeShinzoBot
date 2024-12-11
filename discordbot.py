@@ -65,7 +65,8 @@ model = TTSModel(
     model_path = assets_root / model_file,
     config_path = assets_root / config_file,
     style_vec_path = assets_root / style_file,
-    device = "cuda" if torch.cuda.is_available() else "cpu",
+    #device = "cuda" if torch.cuda.is_available() else "cpu",
+    device = "cpu",
 )
 
 # 正規表現での文字列置換ルールを読み込む
@@ -244,7 +245,8 @@ async def disconnect(ctx: discord.Interaction) -> None:
         return
     # disconnect
     logger.info(f"disconnecting from channel {ctx.message.channel.id}")
-    connected_channels.remove(ctx.message.channel.id)
+    if ctx.message.channel.id in connected_channels:
+        connected_channels.remove(ctx.message.channel.id)
     await ctx.message.guild.voice_client.disconnect()
     await ctx.message.channel.send("切断しました。")
 
@@ -268,8 +270,12 @@ async def on_message(message: discord.Message) -> None:
         return
     if message.channel.id in connected_channels:
         logger.info(f"inference on channel {message.channel.id}")
-        # skip previous playing stream.
+        # ignore empty lines.
         text = message.content
+        text.strip()
+        if len(text) == 0:
+            return
+        # skip previous playing stream.
         if message.guild.voice_client.is_playing():
             logger.info("長い読み上げを省略します")
             message.guild.voice_client.stop()
