@@ -269,7 +269,7 @@ async def on_message(message: discord.Message) -> None:
         return
     if message.channel.id in connected_channels:
         logger.info(f"inference on channel {message.channel.id}")
-        text = message.content.split()
+        text = message.content.strip()
         if len(text) == 0:
             return
         # skip previous playing stream.
