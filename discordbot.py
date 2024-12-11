@@ -244,7 +244,8 @@ async def disconnect(ctx: discord.Interaction) -> None:
         return
     # disconnect
     logger.info(f"disconnecting from channel {ctx.message.channel.id}")
-    connected_channels.remove(ctx.message.channel.id)
+    if ctx.message.channel.id in connected_channels:
+        connected_channels.remove(ctx.message.channel.id)
     await ctx.message.guild.voice_client.disconnect()
     await ctx.message.channel.send("切断しました。")
 
@@ -268,8 +269,10 @@ async def on_message(message: discord.Message) -> None:
         return
     if message.channel.id in connected_channels:
         logger.info(f"inference on channel {message.channel.id}")
+        text = message.content.split()
+        if len(text) == 0:
+            return
         # skip previous playing stream.
-        text = message.content
         if message.guild.voice_client.is_playing():
             logger.info("長い読み上げを省略します")
             message.guild.voice_client.stop()
