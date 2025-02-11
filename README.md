@@ -152,7 +152,7 @@ https://huggingface.co/AbeShinzo0708/AbeShinzo_Style_Bert_VITS2
 
     次のコマンドラインで systemd に登録しBOTを起動します。
     ```bash
-    sudo install -g root -o root -m 644 abeshinzobot.service /etc/systemd/system/abeshinzo.service 
+    sudo install -g root -o root -m 644 abeshinzobot.service /etc/systemd/system/abeshinzobot.service 
     sudo systemctl enable abeshinzobot
     sudo systemctl start abeshinzobot
     ```
